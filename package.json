@@ -1,0 +1,22 @@
+{
+  "name": "hexmapper",
+  "version": "1.0.0",
+  "description": "electron hexmap generator",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aarongaither/hexmapper.git"
+  },
+  "author": "Aaron Gaither",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/aarongaither/hexmapper/issues"
+  },
+  "homepage": "https://github.com/aarongaither/hexmapper#readme",
+  "devDependencies": {
+    "electron": "^3.0.0"
+  }
+}
