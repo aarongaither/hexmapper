@@ -1,6 +1,3 @@
-const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
-
 function drawTestSquares(ctx) {
       ctx.fillStyle = 'rgb(200, 0, 0)';
       ctx.fillRect(10, 10, 50, 50);
@@ -9,19 +6,39 @@ function drawTestSquares(ctx) {
       ctx.fillRect(30, 30, 50, 50);
 }
 
-const drawHexagon = hexProps => ({ ctx, x, y, fill }) => {
+const getXPos = ({ hexRectWidth, hexRadius }) => ({ i, j }) => (i * hexRectWidth + ((j % 2) * hexRadius));
+const getYPos = ({ sideLength, hexHeight }) => ({ j }) => (j * (sideLength + hexHeight));
+
+function drawGrid({ gridWidth, gridHeight, hexFunc, getX, getY }) {
+    for (let i = 0; i < gridWidth; ++i) {
+        for (let j = 0; j < gridHeight; ++j) {
+            hexFunc({
+                x: getX({ i, j }),
+                y: getY({ j }),
+            });
+        }
+    }
+}
+
+const drawHexagon = hexProps => ({ ctx, fill }) => ({ x, y }) => {
     const {
         hexRadius, sideLength, hexHeight,
-        hexRectangleHeight, hexRectangleWidth,
+        hexRectHeight, hexRectWidth,
     } = hexProps;
+    const vectors = [
+        [x + hexRadius, y],
+        [x + hexRectWidth, y + hexHeight],
+        [x + hexRectWidth, y + hexHeight + sideLength],
+        [x + hexRadius, y + hexRectHeight],
+        [x, y + sideLength + hexHeight],
+        [x, y + hexHeight],
+    ];
 
     ctx.beginPath();
-    ctx.moveTo(x + hexRadius, y);
-    ctx.lineTo(x + hexRectangleWidth, y + hexHeight);
-    ctx.lineTo(x + hexRectangleWidth, y + hexHeight + sideLength);
-    ctx.lineTo(x + hexRadius, y + hexRectangleHeight);
-    ctx.lineTo(x, y + sideLength + hexHeight);
-    ctx.lineTo(x, y + hexHeight);
+    vectors.forEach((vector, i) => {
+        if (i === 0) ctx.moveTo(...vector);
+        else ctx.lineTo(...vector);
+    })
     ctx.closePath();
 
     if (fill) {
@@ -35,23 +52,28 @@ const drawHexagon = hexProps => ({ ctx, x, y, fill }) => {
     }
 }
 
-const hexagonAngle = 0.523598776; // 30 degrees in radians
-const sideLength = 36;
-const boardWidth = 10;
-const boardHeight = 10;
-const hexHeight = Math.sin(hexagonAngle) * sideLength;
-const hexRadius = Math.cos(hexagonAngle) * sideLength;
-const hexRectangleHeight = sideLength + 2 * hexHeight;
-const hexRectangleWidth = 2 * hexRadius;
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+
+const hexAngle = 0.523598776; // 30 degrees in radians
+const sideLength = 25;
+const gridWidth = 10;
+const gridHeight = 10;
+const hexHeight = Math.sin(hexAngle) * sideLength;
+const hexRadius = Math.cos(hexAngle) * sideLength;
+const hexRectHeight = sideLength + 2 * hexHeight;
+const hexRectWidth = 2 * hexRadius;
 
 const hexProps = {
     sideLength,
     hexHeight,
     hexRadius,
-    hexRectangleHeight,
-    hexRectangleWidth
+    hexRectHeight,
+    hexRectWidth
 };
 
-const hexFunc = drawHexagon(hexProps);
+const hexFunc = drawHexagon(hexProps)({ ctx });
+const getX = getXPos(hexProps);
+const getY = getYPos(hexProps);
 
-hexFunc({ ctx, x: 10, y: 10 });
+drawGrid({ gridHeight, gridWidth, hexFunc, getX, getY });
